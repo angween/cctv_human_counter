@@ -3,6 +3,11 @@ import numpy as np
 import msvcrt
 from ultralytics import YOLO
 
+# Workaround: ultralytics monkey-patches cv2.imshow dengan wrapper yang
+# bisa error di lingkungan tertentu. Reload cv2 untuk restore fungsi asli.
+import importlib
+importlib.reload(cv2)
+
 def main(video_source="test1.mp4", save_video=False, show_video=True):
     # 1. Load model YOLOv11 nano
     print("Loading YOLOv11 model...")
@@ -38,7 +43,7 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
     # Garis penghitung horizontal (di dalam ROI)
     # Garis harus cukup rendah agar orang yang keluar (OUT) terdeteksi di Zone 2 (bawah) dulu
     line_y_1 = int(height * 0.4)
-    line_y_2 = line_y_1 + 60
+    line_y_2 = line_y_1 + 90
 
     # State tracking
     track_history = {} # ID: { "history": list_of_y, "counted": boolean }
@@ -111,6 +116,10 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
                     else:
                         id_map[track_id] = next_short_id
                         next_short_id += 1
+                        # Reset short ID ke 1 jika sudah mencapai 100
+                        if next_short_id >= 100:
+                            next_short_id = 1
+                            recycled_ids.clear()
                 
                 active_ids_this_frame.add(track_id)
                 track_history[track_id]["invisible_count"] = 0  # Reset counter jika terdeteksi kembali
@@ -200,9 +209,9 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
         # Print hanya saat ada perubahan IN atau OUT
         if in_count != prev_in_count or out_count != prev_out_count:
             if in_count != prev_in_count:
-                print(f"[IN] Orang masuk terdeteksi! Total IN: {in_count}, OUT: {out_count}")
+                print(f"[IN] Total IN: {in_count}, OUT: {out_count}")
             if out_count != prev_out_count:
-                print(f"[OUT] Orang keluar terdeteksi! Total IN: {in_count}, OUT: {out_count}")
+                print(f"[OUT] Total IN: {in_count}, OUT: {out_count}")
             prev_in_count = in_count
             prev_out_count = out_count
 
@@ -220,7 +229,9 @@ if __name__ == "__main__":
     # Konfigurasi source:
     user = "pooling"
     password = "YamahaNo1"
-    rtsp_url = f"rtsp://{user}:{password}@172.16.0.187:554/Streaming/Channels/402"
+    rtsp_url = f"rtsp://{user}:{password}@172.16.0.187:554/Streaming/Channels/401"  # sentral
+    # rtsp_url = f"rtsp://{user}:{password}@172.16.0.196:554/Streaming/Channels/101" # lubeg
+
     sources = [
         rtsp_url,    # Index 0: CCTV (RTSP)
         0,           # Index 1: Webcam (Internal/USB)
