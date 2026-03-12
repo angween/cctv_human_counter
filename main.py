@@ -1,6 +1,8 @@
+import os
 import cv2
 import numpy as np
 import msvcrt
+from dotenv import load_dotenv
 from ultralytics import YOLO
 
 # Workaround: ultralytics monkey-patches cv2.imshow dengan wrapper yang
@@ -226,11 +228,14 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    # Konfigurasi source:
-    user = "pooling"
-    password = "YamahaNo1"
-    rtsp_url = f"rtsp://{user}:{password}@172.16.0.187:554/Streaming/Channels/401"  # sentral
-    # rtsp_url = f"rtsp://{user}:{password}@172.16.0.196:554/Streaming/Channels/101" # lubeg
+    # Load kredensial dari file .env
+    load_dotenv()
+    user = os.getenv("RTSP_USER")
+    password = os.getenv("RTSP_PASSWORD")
+    host_sentral = os.getenv("RTSP_HOST_SENTRAL")
+    host_lubeg = os.getenv("RTSP_HOST_LUBEG")
+    rtsp_url = f"rtsp://{user}:{password}@{host_sentral}/Streaming/Channels/401"  # sentral
+    # rtsp_url = f"rtsp://{user}:{password}@{host_lubeg}/Streaming/Channels/101" # lubeg
 
     sources = [
         rtsp_url,    # Index 0: CCTV (RTSP)

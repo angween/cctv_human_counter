@@ -1,3 +1,4 @@
 /.venv
 /output_test1.mp4
 /test_vid
+.env
