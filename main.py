@@ -42,8 +42,8 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
 
     # Garis penghitung horizontal (di dalam ROI)
     # Garis harus cukup rendah agar orang yang keluar (OUT) terdeteksi di Zone 2 (bawah) dulu
-    line_y_1 = int(height * 0.4)
-    line_y_2 = line_y_1 + 90
+    line_y_1 = int(height * 0.35)
+    line_y_2 = line_y_1 + 170
 
     # State tracking
     track_history = {} # ID: { "history": list_of_y, "counted": boolean }
@@ -92,7 +92,7 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
                 x1, y1, x2, y2 = map(int, box)
                 
                 # Filter: confidence minimal 0.3 (dilonggarkan agar orang yang tertutup motor tetap terdeteksi)
-                if conf < 0.3:
+                if conf < 0.5:
                     continue
                 
                 # Pusat bounding box
