@@ -7,8 +7,8 @@ from ultralytics import YOLO
 
 # Workaround: ultralytics monkey-patches cv2.imshow dengan wrapper yang
 # bisa error di lingkungan tertentu. Reload cv2 untuk restore fungsi asli.
-import importlib
-importlib.reload(cv2)
+# import importlib
+# importlib.reload(cv2)
 
 def main(video_source="test1.mp4", save_video=False, show_video=True):
     # 1. Load model YOLOv11 nano
