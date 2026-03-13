@@ -45,15 +45,15 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
     # Garis penghitung horizontal (di dalam ROI)
     # Garis harus cukup rendah agar orang yang keluar (OUT) terdeteksi di Zone 2 (bawah) dulu
     line_y_1 = int(height * 0.35)
-    line_y_2 = line_y_1 + 170
+    line_y_2 = line_y_1 + 200
 
     # State tracking
     track_history = {} # ID: { "history": list_of_y, "counted": boolean }
     
     # Short ID mapping (agar ID tampil pendek, di-recycle saat orang hilang)
-    # id_map = {}           # tracker_id -> short_id
-    # next_short_id = 1     # ID pendek berikutnya
-    # recycled_ids = []     # ID pendek yang bisa digunakan ulang
+    id_map = {}           # tracker_id -> short_id
+    next_short_id = 1     # ID pendek berikutnya
+    recycled_ids = []     # ID pendek yang bisa digunakan ulang
     
     in_count = 0
     out_count = 0
@@ -113,19 +113,19 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
                         "invisible_count": 0
                     }
                     # Beri short ID
-                    # if recycled_ids:
-                    #     id_map[track_id] = recycled_ids.pop(0)
-                    # else:
-                    #     id_map[track_id] = next_short_id
-                    #     next_short_id += 1
-                    #     # Reset short ID ke 1 jika sudah mencapai 100
-                    #     if next_short_id >= 100:
-                    #         next_short_id = 1
-                    #         recycled_ids.clear()
+                    if recycled_ids:
+                        id_map[track_id] = recycled_ids.pop(0)
+                    else:
+                        id_map[track_id] = next_short_id
+                        next_short_id += 1
+                        # Reset short ID ke 1 jika sudah mencapai 100
+                        if next_short_id >= 100:
+                            next_short_id = 1
+                            recycled_ids.clear()
                 
                 active_ids_this_frame.add(track_id)
                 track_history[track_id]["invisible_count"] = 0  # Reset counter jika terdeteksi kembali
-                # short_id = id_map.get(track_id, track_id)
+                short_id = id_map.get(track_id, track_id)
                 
                 # Penentuan posisi berada di Zone mana (0: Atas, 1: Tengah, 2: Bawah)
                 if cy < line_y_1:
@@ -150,11 +150,11 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
                         # IN: Jika dia menginjak Zone 0 (Atas) lebih dulu daripada Zone 2 (Bawah)
                         if idx_0 < idx_2:
                             in_count += 1
-                            print(f"  >> [IN] ID {track_id} zones: {zones}")
+                            print(f"  >> [IN] ID {short_id} zones: {zones}")
                         # OUT: Jika dia menginjak Zone 2 (Bawah) lebih dulu daripada Zone 0 (Atas)
                         else:
                             out_count += 1
-                            print(f"  >> [OUT] ID {track_id} zones: {zones}")
+                            print(f"  >> [OUT] ID {short_id} zones: {zones}")
                             
                         track_history[track_id]["counted"] = True
 
@@ -162,7 +162,7 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
                 color = (0, 255, 0) if track_history[track_id]["counted"] else (255, 0, 0)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                 cv2.circle(frame, (cx, cy), 5, color, -1)
-                cv2.putText(frame, f"ID: {track_id}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                cv2.putText(frame, f"ID: {short_id}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
         
         # Bersihkan ID yang sudah hilang dari frame (recycle short ID)
         stale_ids = []
@@ -173,10 +173,10 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
                     stale_ids.append(tid)
 
         for tid in stale_ids:
-            # if tid in id_map:
-            #     recycled_ids.append(id_map.pop(tid))
+            if tid in id_map:
+                recycled_ids.append(id_map.pop(tid))
             del track_history[tid]
-            # recycled_ids.sort()
+        recycled_ids.sort()
 
         # 4. Tampilkan HUD Teks Masuk/Keluar
         cv2.putText(frame, f"IN: {in_count}", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
@@ -210,10 +210,10 @@ def main(video_source="test1.mp4", save_video=False, show_video=True):
 
         # Print hanya saat ada perubahan IN atau OUT
         if in_count != prev_in_count or out_count != prev_out_count:
-            if in_count != prev_in_count:
-                print(f"[IN] Total IN: {in_count}, OUT: {out_count}")
-            if out_count != prev_out_count:
-                print(f"[OUT] Total IN: {in_count}, OUT: {out_count}")
+            # if in_count != prev_in_count:
+            #     print(f"[IN] Total IN: {in_count}, OUT: {out_count}")
+            # if out_count != prev_out_count:
+            #     print(f"[OUT] Total IN: {in_count}, OUT: {out_count}")
             prev_in_count = in_count
             prev_out_count = out_count
 
