@@ -2,3 +2,6 @@
 /output_test1.mp4
 /test_vid
 .env
+/yolo11m.pt
+/yolo11n.pt
+/yolo11l.pt

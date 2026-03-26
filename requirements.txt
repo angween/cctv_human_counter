@@ -1,7 +1,8 @@
---extra-index-url https://download.pytorch.org/whl/cu126
+--extra-index-url https://download.pytorch.org/whl/cu130
 torch
 torchvision
 ultralytics
 opencv-python
 numpy
 lapx
+dotenv

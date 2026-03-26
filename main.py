@@ -13,7 +13,7 @@ from ultralytics import YOLO
 def main(video_source="test1.mp4", save_video=False, show_video=True):
     # 1. Load model YOLOv11 nano
     print("Loading YOLOv11 model...")
-    model = YOLO("yolo11n.pt")
+    model = YOLO("yolo11l.pt")
     print("Model loaded.")
 
     # 2. Buka source video (file, RTSP, atau index kamera)
